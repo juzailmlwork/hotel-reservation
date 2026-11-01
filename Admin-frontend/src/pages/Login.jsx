@@ -25,7 +25,7 @@ export default function Login() {
       <CredentialsForm
         submitLabel="Login"
         onSubmit={handleLogin}
-        requireSpecialChar={false}
+        newPassword={false}
         requireGmail={false}
       />
     </AuthLayout>

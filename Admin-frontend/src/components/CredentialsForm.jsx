@@ -8,6 +8,7 @@ export default function CredentialsForm({
   resetOnSuccess = false,
   requireSpecialChar = true,
   requireGmail = true,
+  newPassword = true,
   idPrefix = '',
 }) {
   const [values, setValues] = useState({ username: '', password: '' });
@@ -70,8 +71,8 @@ export default function CredentialsForm({
             id={passwordId}
             name="password"
             type={showPassword ? 'text' : 'password'}
-            autoComplete={requireSpecialChar ? 'new-password' : 'current-password'}
-            placeholder={requireSpecialChar ? 'Create a password' : 'Enter your password'}
+            autoComplete={newPassword ? 'new-password' : 'current-password'}
+            placeholder={newPassword ? 'Create a password' : 'Enter your password'}
             value={values.password}
             onChange={handleChange}
           />
@@ -87,7 +88,7 @@ export default function CredentialsForm({
         {errors.password ? (
           <p className="error">{errors.password}</p>
         ) : (
-          requireSpecialChar && (
+          newPassword && requireSpecialChar && (
             <p className="hint">At least 6 characters, including one special character.</p>
           )
         )}

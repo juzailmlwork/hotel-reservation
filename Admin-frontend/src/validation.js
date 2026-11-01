@@ -2,7 +2,7 @@ export const MIN_PASSWORD_LENGTH = 6;
 const SPECIAL_CHAR = /[^A-Za-z0-9]/;
 const GMAIL = /^[^\s@]+@gmail\.com$/i;
 
-// The extra rules are turned off for login so existing accounts can still sign in.
+// The Gmail rule is turned off for login so existing accounts (e.g. admin@hotel.com) can still sign in.
 export function validateCredentials(
   { username, password },
   { requireSpecialChar = true, requireGmail = true } = {},
