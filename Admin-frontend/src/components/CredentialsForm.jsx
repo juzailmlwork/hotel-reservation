@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { validateCredentials } from '../validation';
 
-export default function CredentialsForm({ submitLabel, onSubmit, resetOnSuccess = false }) {
+export default function CredentialsForm({
+  submitLabel,
+  onSubmit,
+  resetOnSuccess = false,
+  requireSpecialChar = true,
+}) {
   const [values, setValues] = useState({ username: '', password: '' });
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
@@ -15,7 +20,7 @@ export default function CredentialsForm({ submitLabel, onSubmit, resetOnSuccess 
     e.preventDefault();
     setServerError('');
 
-    const validationErrors = validateCredentials(values);
+    const validationErrors = validateCredentials(values, { requireSpecialChar });
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length) return;
 
