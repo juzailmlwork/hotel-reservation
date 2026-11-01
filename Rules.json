@@ -16,6 +16,11 @@
     {
       "id": 3,
       "rule": "Do not add AI co-author or co-contributor attribution to commits or pull requests."
+    },
+    {
+      "id": 4,
+      "rule": "Every feature branch must update the test cases.",
+      "details": "Fix tests broken by the change and add tests for any new behaviour before the branch is merged into dev."
     }
   ]
 }
