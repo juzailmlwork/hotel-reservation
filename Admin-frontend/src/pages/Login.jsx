@@ -14,7 +14,7 @@ export default function Login() {
   return (
     <div className="card">
       <h1>Admin Login</h1>
-      <CredentialsForm submitLabel="Login" onSubmit={handleLogin} />
+      <CredentialsForm submitLabel="Login" onSubmit={handleLogin} requireSpecialChar={false} />
       <p>
         No account? <Link to="/register">Register</Link>
       </p>
