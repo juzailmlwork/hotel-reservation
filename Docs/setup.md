@@ -6,7 +6,7 @@
 cd Backend
 cp .env.example .env   # then set JWT_SECRET and SEED_ADMIN_PASSWORD
 npm install
-npm run dev            # http://localhost:5000
+npm run dev            # http://localhost:5004
 npm test
 ```
 
@@ -31,6 +31,6 @@ Validation: username required, password minimum 6 characters.
 cd Admin-frontend
 cp .env.example .env   # VITE_API_URL points at the backend
 npm install
-npm run dev            # http://localhost:5173
+npm run dev            # http://localhost:5003
 npm test
 ```

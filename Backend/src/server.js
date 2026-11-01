@@ -10,7 +10,7 @@ if (!process.env.JWT_SECRET) {
 
 seedAdmin();
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5004;
 createApp().listen(port, () => {
   console.log(`Backend running on http://localhost:${port}`);
 });
