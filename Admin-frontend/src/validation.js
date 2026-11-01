@@ -1,12 +1,18 @@
 export const MIN_PASSWORD_LENGTH = 6;
 const SPECIAL_CHAR = /[^A-Za-z0-9]/;
+const GMAIL = /^[^\s@]+@gmail\.com$/i;
 
-// requireSpecialChar is turned off for login so existing accounts can still sign in.
-export function validateCredentials({ username, password }, { requireSpecialChar = true } = {}) {
+// The extra rules are turned off for login so existing accounts can still sign in.
+export function validateCredentials(
+  { username, password },
+  { requireSpecialChar = true, requireGmail = true } = {},
+) {
   const errors = {};
 
   if (!username || username.trim() === '') {
-    errors.username = 'Username is required';
+    errors.username = 'Email is required';
+  } else if (requireGmail && !GMAIL.test(username.trim())) {
+    errors.username = 'Email must be a @gmail.com address';
   }
 
   if (!password) {
