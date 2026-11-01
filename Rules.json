@@ -1,0 +1,21 @@
+{
+  "branches": {
+    "main": "Production branch",
+    "dev": "Development branch (default)"
+  },
+  "rules": [
+    {
+      "id": 1,
+      "rule": "Never commit or merge anything directly into main.",
+      "details": "All work goes into dev first (via feature branches). main is only updated by merging dev into main."
+    },
+    {
+      "id": 2,
+      "rule": "Merge flow is always: feature branch -> dev -> main."
+    },
+    {
+      "id": 3,
+      "rule": "Do not add AI co-author or co-contributor attribution to commits or pull requests."
+    }
+  ]
+}
