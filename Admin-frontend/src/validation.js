@@ -1,7 +1,6 @@
 export const MIN_PASSWORD_LENGTH = 6;
 const SPECIAL_CHAR = /[^A-Za-z0-9]/;
 
-// requireSpecialChar is turned off for login so existing accounts can still sign in.
 export function validateCredentials({ username, password }, { requireSpecialChar = true } = {}) {
   const errors = {};
 
