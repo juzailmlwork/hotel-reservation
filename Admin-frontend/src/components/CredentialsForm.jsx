@@ -1,16 +1,24 @@
 import { useState } from 'react';
 import { validateCredentials } from '../validation';
+import { EyeIcon, EyeOffIcon, LockIcon, MailIcon } from './Icons';
 
 export default function CredentialsForm({
   submitLabel,
   onSubmit,
   resetOnSuccess = false,
   requireSpecialChar = true,
+  requireGmail = true,
+  newPassword = true,
+  idPrefix = '',
 }) {
   const [values, setValues] = useState({ username: '', password: '' });
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const usernameId = `${idPrefix}username`;
+  const passwordId = `${idPrefix}password`;
 
   function handleChange(e) {
     setValues({ ...values, [e.target.name]: e.target.value });
@@ -20,7 +28,7 @@ export default function CredentialsForm({
     e.preventDefault();
     setServerError('');
 
-    const validationErrors = validateCredentials(values, { requireSpecialChar });
+    const validationErrors = validateCredentials(values, { requireSpecialChar, requireGmail });
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length) return;
 
@@ -37,24 +45,62 @@ export default function CredentialsForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
-      <label htmlFor="username">Username</label>
-      <input id="username" name="username" value={values.username} onChange={handleChange} />
-      {errors.username && <p className="error">{errors.username}</p>}
+    <form className="form" onSubmit={handleSubmit} noValidate>
+      <div className="field">
+        <label htmlFor={usernameId}>Email</label>
+        <div className={`input-wrap${errors.username ? ' has-error' : ''}`}>
+          <MailIcon />
+          <input
+            id={usernameId}
+            name="username"
+            type="email"
+            autoComplete="username"
+            placeholder={requireGmail ? 'name@gmail.com' : 'you@example.com'}
+            value={values.username}
+            onChange={handleChange}
+          />
+        </div>
+        {errors.username && <p className="error">{errors.username}</p>}
+      </div>
 
-      <label htmlFor="password">Password</label>
-      <input
-        id="password"
-        name="password"
-        type="password"
-        value={values.password}
-        onChange={handleChange}
-      />
-      {errors.password && <p className="error">{errors.password}</p>}
+      <div className="field">
+        <label htmlFor={passwordId}>Password</label>
+        <div className={`input-wrap${errors.password ? ' has-error' : ''}`}>
+          <LockIcon />
+          <input
+            id={passwordId}
+            name="password"
+            type={showPassword ? 'text' : 'password'}
+            autoComplete={newPassword ? 'new-password' : 'current-password'}
+            placeholder={newPassword ? 'Create a password' : 'Enter your password'}
+            value={values.password}
+            onChange={handleChange}
+          />
+          <button
+            type="button"
+            className="icon-btn"
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+          </button>
+        </div>
+        {errors.password ? (
+          <p className="error">{errors.password}</p>
+        ) : (
+          newPassword && requireSpecialChar && (
+            <p className="hint">At least 6 characters, including one special character.</p>
+          )
+        )}
+      </div>
 
-      {serverError && <p className="error" role="alert">{serverError}</p>}
+      {serverError && (
+        <p className="alert" role="alert">
+          {serverError}
+        </p>
+      )}
 
-      <button type="submit" disabled={submitting}>
+      <button type="submit" className="btn-primary" disabled={submitting}>
         {submitting ? 'Please wait...' : submitLabel}
       </button>
     </form>
