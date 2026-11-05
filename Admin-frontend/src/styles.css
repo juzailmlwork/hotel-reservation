@@ -257,6 +257,15 @@ label {
   font-size: 14px;
 }
 
+.notice {
+  margin-top: 20px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fffbeb;
+  color: #b45309;
+  font-size: 14px;
+}
+
 .success {
   display: flex;
   align-items: center;
