@@ -4,7 +4,7 @@ import AuthLayout from '../components/AuthLayout';
 import CredentialsForm from '../components/CredentialsForm';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, sessionExpired } = useAuth();
   const navigate = useNavigate();
 
   async function handleLogin(values) {
@@ -22,6 +22,11 @@ export default function Login() {
         </>
       }
     >
+      {sessionExpired && (
+        <p className="notice" role="status">
+          Your session has expired. Please sign in again.
+        </p>
+      )}
       <CredentialsForm
         submitLabel="Login"
         onSubmit={handleLogin}

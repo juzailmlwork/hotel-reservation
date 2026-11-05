@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const request = require('supertest');
+const jwt = require('jsonwebtoken');
 
 const TEST_DATA_FILE = 'data.test.json';
 const testFilePath = path.resolve(__dirname, '..', TEST_DATA_FILE);
@@ -101,11 +102,49 @@ describe('GET /api/auth/me', () => {
   test('rejects missing token', async () => {
     const res = await request(app).get('/api/auth/me');
     expect(res.status).toBe(401);
+    expect(res.body.code).toBe('TOKEN_MISSING');
   });
 
   test('rejects invalid token', async () => {
     const res = await request(app).get('/api/auth/me').set('Authorization', 'Bearer not-a-token');
     expect(res.status).toBe(401);
+    expect(res.body).toEqual({ message: 'Invalid token', code: 'TOKEN_INVALID' });
+  });
+
+  test('rejects expired token with a TOKEN_EXPIRED code', async () => {
+    const expired = jwt.sign({ sub: 'x', username: 'admin@hotel.com' }, process.env.JWT_SECRET, {
+      expiresIn: -10,
+    });
+    const res = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${expired}`);
+    expect(res.status).toBe(401);
+    expect(res.body).toEqual({ message: 'Session expired', code: 'TOKEN_EXPIRED' });
+  });
+
+  test('rejects token signed with a different secret', async () => {
+    const forged = jwt.sign({ sub: 'x', username: 'admin@hotel.com' }, 'wrong-secret');
+    const res = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${forged}`);
+    expect(res.status).toBe(401);
+    expect(res.body.code).toBe('TOKEN_INVALID');
+  });
+
+  test('issued tokens expire after JWT_EXPIRES_IN', async () => {
+    const token = await loginAsAdmin();
+    const { iat, exp } = jwt.decode(token);
+    expect(exp - iat).toBe(60 * 60); // default 1h
+  });
+});
+
+describe('expired token on protected user routes', () => {
+  test('cannot create a user with an expired token', async () => {
+    const expired = jwt.sign({ sub: 'x', username: 'admin@hotel.com' }, process.env.JWT_SECRET, {
+      expiresIn: -10,
+    });
+    const res = await request(app)
+      .post('/api/users')
+      .set('Authorization', `Bearer ${expired}`)
+      .send({ username: 'late@gmail.com', password: 'abc@123' });
+    expect(res.status).toBe(401);
+    expect(res.body.code).toBe('TOKEN_EXPIRED');
   });
 });
 
