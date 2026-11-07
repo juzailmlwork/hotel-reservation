@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { api, getToken, getTokenExpiry, onUnauthorized, setToken } from './api';
 
 const AuthContext = createContext(null);
-const MAX_TIMEOUT = 2 ** 31 - 1;
+const MAX_TIMEOUT = 2 ** 31 - 2;
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
