@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend - build & test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: Backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (syntax check all source files)
+        run: find src tests -name '*.js' -print0 | xargs -0 -n1 node --check
+
+      - name: Build (verify app loads)
+        run: node -e "require('./src/app')"
+
+      - name: Run tests
+        run: npm test
+
+  admin-frontend:
+    name: Admin frontend - build & test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Admin-frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: Admin-frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests
+        run: npm test
