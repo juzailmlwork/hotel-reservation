@@ -39,5 +39,6 @@ jobs:
           echo "----------------------------------------"
           cd Admin-frontend
           pwd
-          echo "Number of files:"
-          find . -type f | wc -l
+          echo "Files in Admin frontend:"
+          ls -a
+  
