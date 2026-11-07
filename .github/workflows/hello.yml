@@ -1,14 +1,15 @@
 name: Hello
 
 # ---------------------------------------------------------------
-# TRIGGERS - all commented out on purpose for teaching.
-# Uncomment one (or more) and push to see the workflow run.
-# Note: while ALL of them are commented out, GitHub has no trigger
-# and marks this file as an invalid workflow - that's expected.
+# TRIGGERS - push and pull_request are commented out for teaching.
+# Uncomment them and push to see the workflow run automatically.
+# Note: `on:` needs at least ONE trigger, otherwise GitHub says
+# "Invalid workflow file ... Unexpected value ''". That's why the
+# manual trigger stays on.
 # ---------------------------------------------------------------
 on:
   # 1. Manual run: adds a "Run workflow" button on the Actions tab.
-  # workflow_dispatch:
+  workflow_dispatch:
 
   # 2. Runs on every push to the dev branch.
   # push:
