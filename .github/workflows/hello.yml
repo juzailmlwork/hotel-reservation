@@ -27,12 +27,6 @@ jobs:
       - name: Clone the repo
         uses: actions/checkout@v4
 
-      - name: Introduce myself
-        run: echo "My name is Jusail"
-
-      - name: Tell the time
-        run: echo "The time now is $(date '+%Y-%m-%d %H:%M:%S %Z')"
-
       - name: Count files in Admin-frontend
         run: |
           pwd
@@ -41,4 +35,14 @@ jobs:
           pwd
           echo "Files in Admin frontend:"
           ls -a
-  
+
+  bye:
+    name: Say Bye
+    runs-on: ubuntu-latest
+    steps:
+      - name: Introduce myself
+        run: echo "My name is Jusail"
+
+      - name: Tell the time
+        run: echo "The time now is $(date '+%Y-%m-%d %H:%M:%S %Z')"
+
