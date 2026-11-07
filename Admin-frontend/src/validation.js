@@ -1,4 +1,4 @@
-export const MIN_PASSWORD_LENGTH = 6;
+export const MIN_PASSWORD_LENGTH = 10;
 const SPECIAL_CHAR = /[^A-Za-z0-9]/;
 const GMAIL = /^[^\s@]+@gmail\.com$/i;
 
