@@ -12,8 +12,8 @@ on:
   workflow_dispatch:
 
   # 2. Runs on every push to the dev branch.
-  # push:
-  #   branches: [dev]
+  push:
+    branches: [dev]
 
   # 3. Runs when a pull request targets the dev branch.
   # pull_request:
