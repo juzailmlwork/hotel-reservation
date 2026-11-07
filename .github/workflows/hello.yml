@@ -1,0 +1,39 @@
+name: Hello
+
+# ---------------------------------------------------------------
+# TRIGGERS - all commented out on purpose for teaching.
+# Uncomment one (or more) and push to see the workflow run.
+# Note: while ALL of them are commented out, GitHub has no trigger
+# and marks this file as an invalid workflow - that's expected.
+# ---------------------------------------------------------------
+on:
+  # 1. Manual run: adds a "Run workflow" button on the Actions tab.
+  # workflow_dispatch:
+
+  # 2. Runs on every push to the dev branch.
+  # push:
+  #   branches: [dev]
+
+  # 3. Runs when a pull request targets the dev branch.
+  # pull_request:
+  #   branches: [dev]
+
+jobs:
+  hello:
+    name: Say hello
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the repo
+        uses: actions/checkout@v4
+
+      - name: Introduce myself
+        run: echo "My name is Jusail"
+
+      - name: Tell the time
+        run: echo "The time now is $(date '+%Y-%m-%d %H:%M:%S %Z')"
+
+      - name: Count files in GitHub Actions folder
+        run: |
+          echo "Files in .github/workflows: $(find .github/workflows -type f | wc -l)"
+          echo "Files in .github (total):   $(find .github -type f | wc -l)"
+          ls -la .github/workflows

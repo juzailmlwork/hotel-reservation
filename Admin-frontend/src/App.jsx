@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import Login from './pages/Login';
-import jusail
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 
