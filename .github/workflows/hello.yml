@@ -13,7 +13,7 @@ on:
 
   # 2. Runs on every push to the dev branch.
   push:
-    branches: [dev]
+    branches: [dev,test-branch]
 
   # 3. Runs when a pull request targets the dev branch.
   # pull_request:
