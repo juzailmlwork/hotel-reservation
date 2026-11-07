@@ -93,7 +93,7 @@ jobs:
     # Without `needs`, deploy starts at the SAME TIME as the check jobs and
     # still runs (and "deploys") even if lint/build/tests FAIL.
     # Uncomment it so deploy waits for both jobs and only runs if both succeed.
-    # needs: [backend, admin-frontend]
+    needs: [backend, admin-frontend]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment: production
     env:
