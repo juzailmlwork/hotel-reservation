@@ -128,56 +128,6 @@
   #     - run: npm audit --omit=dev --audit-level=high
 
   # -----------------------------------------------------------------
-  # LESSON 5: Linting (code style / common mistakes)
-  # Concept: a "quality gate" step. Requires adding ESLint first:
-  #   npm init @eslint/config@latest   (inside Backend / Admin-frontend)
-  #   and a "lint": "eslint ." script in package.json.
+  # Lint, deploy (needs / if / environment) and secrets & variables
+  # are no longer examples - they run for real in workflows/ci.yml.
   # -----------------------------------------------------------------
-  # lint:
-  #   name: Lint (${{ matrix.project }})
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       project: [Backend, Admin-frontend]
-  #   defaults:
-  #     run:
-  #       working-directory: ${{ matrix.project }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 24
-  #         cache: npm
-  #         cache-dependency-path: ${{ matrix.project }}/package-lock.json
-  #     - run: npm ci
-  #     - run: npm run lint
-
-  # -----------------------------------------------------------------
-  # LESSON 6: Job dependencies with `needs` + conditions with `if`
-  # Concept: this job waits for both jobs above to pass, and only
-  # runs on a push to main (not on PRs). A placeholder for "deploy".
-  # -----------------------------------------------------------------
-  # deploy:
-  #   name: Deploy (placeholder)
-  #   runs-on: ubuntu-latest
-  #   needs: [backend, admin-frontend]
-  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-  #   environment: production   # can require manual approval in repo settings
-  #   steps:
-  #     - run: echo "All checks passed on main - deploy would happen here."
-
-  # -----------------------------------------------------------------
-  # LESSON 7: Using secrets
-  # Concept: store values in Settings > Secrets and variables > Actions,
-  # then read them with ${{ secrets.NAME }}. They are masked in logs.
-  # -----------------------------------------------------------------
-  # secrets-demo:
-  #   name: Secrets demo
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Use a secret as an env var
-  #       env:
-  #         JWT_SECRET: ${{ secrets.JWT_SECRET }}
-  #       run: |
-  #         if [ -z "$JWT_SECRET" ]; then echo "Secret not set"; exit 1; fi
-  #         echo "Secret is set (value is hidden: $JWT_SECRET)"

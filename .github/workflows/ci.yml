@@ -10,9 +10,14 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Workflow-level env variable: plain text, visible to every job.
+# Read it with ${{ env.NODE_VERSION }} (in YAML) or $NODE_VERSION (in shell).
+env:
+  NODE_VERSION: 24
+
 jobs:
   backend:
-    name: Backend - build & test
+    name: Backend - lint, build & test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -22,12 +27,16 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: Backend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
+
+      # Lint must come AFTER install: ESLint is a devDependency.
+      - name: Lint
+        run: npm run lint
 
       - name: Build (syntax check all source files)
         run: find src tests -name '*.js' -print0 | xargs -0 -n1 node --check
@@ -39,7 +48,7 @@ jobs:
         run: npm test
 
   admin-frontend:
-    name: Admin frontend - build & test
+    name: Admin frontend - lint, build & test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -49,15 +58,72 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: Admin-frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint
+        run: npm run lint
+
       - name: Build
         run: npm run build
 
       - name: Run tests
         run: npm test
+
+  # ---------------------------------------------------------------
+  # Deploy (demo). Shows:
+  #   - `needs`: waits for both jobs above to pass
+  #   - `if`: only runs on a push to main (never on PRs)
+  #   - `environment`: groups secrets/variables; can require approval
+  #   - secrets  -> ${{ secrets.NAME }}  (encrypted, masked in logs)
+  #   - variables -> ${{ vars.NAME }}    (plain text, shown in logs)
+  #
+  # Set them up in GitHub: Settings > Secrets and variables > Actions
+  #   Secret:   JWT_SECRET  (e.g. a long random string)
+  #   Variable: API_URL     (e.g. https://api.example.com/api)
+  # ---------------------------------------------------------------
+  deploy:
+    name: Deploy (demo)
+    runs-on: ubuntu-latest
+    needs: [backend, admin-frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+    env:
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      VITE_API_URL: ${{ vars.API_URL || 'http://localhost:5004/api' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: Admin-frontend/package-lock.json
+
+      - name: Show variables (safe to print)
+        run: |
+          echo "Node version (env):  $NODE_VERSION"
+          echo "API URL (variable):  $VITE_API_URL"
+          echo "Branch:              ${{ github.ref_name }}"
+          echo "Commit:              ${{ github.sha }}"
+
+      - name: Check secret (value is masked as ***)
+        run: |
+          if [ -z "$JWT_SECRET" ]; then
+            echo "::warning::JWT_SECRET is not set. Add it under Settings > Secrets and variables > Actions."
+          else
+            echo "JWT_SECRET is set. Printing it shows: $JWT_SECRET"
+          fi
+
+      - name: Build admin frontend with the API URL variable
+        working-directory: Admin-frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy (placeholder)
+        run: echo "Build ready in Admin-frontend/dist - a real deploy step would upload it here."
