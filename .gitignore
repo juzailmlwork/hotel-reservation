@@ -26,3 +26,6 @@ yarn-error.log*
 Thumbs.db
 .vscode/
 .idea/
+
+# Local CI script logs
+.ci-logs/

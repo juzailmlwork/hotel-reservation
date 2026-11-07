@@ -128,56 +128,57 @@
   #     - run: npm audit --omit=dev --audit-level=high
 
   # -----------------------------------------------------------------
-  # LESSON 5: Linting (code style / common mistakes)
-  # Concept: a "quality gate" step. Requires adding ESLint first:
-  #   npm init @eslint/config@latest   (inside Backend / Admin-frontend)
-  #   and a "lint": "eslint ." script in package.json.
+  # LESSON 5: Multi-line Linux commands in one step
+  # Concept: `run: |` keeps line breaks, so a step can be a small bash
+  # script - variables, loops, if/else, functions. Each step runs in a
+  # fresh shell; GitHub uses `bash -e` so the step fails on the first
+  # failing command. `set -euo pipefail` makes it even stricter.
+  # $GITHUB_STEP_SUMMARY is a file whose Markdown shows on the run page.
   # -----------------------------------------------------------------
-  # lint:
-  #   name: Lint (${{ matrix.project }})
+  # multi-line-demo:
+  #   name: Multi-line shell demo
   #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       project: [Backend, Admin-frontend]
-  #   defaults:
-  #     run:
-  #       working-directory: ${{ matrix.project }}
   #   steps:
   #     - uses: actions/checkout@v4
   #     - uses: actions/setup-node@v4
   #       with:
   #         node-version: 24
-  #         cache: npm
-  #         cache-dependency-path: ${{ matrix.project }}/package-lock.json
-  #     - run: npm ci
-  #     - run: npm run lint
-
-  # -----------------------------------------------------------------
-  # LESSON 6: Job dependencies with `needs` + conditions with `if`
-  # Concept: this job waits for both jobs above to pass, and only
-  # runs on a push to main (not on PRs). A placeholder for "deploy".
-  # -----------------------------------------------------------------
-  # deploy:
-  #   name: Deploy (placeholder)
-  #   runs-on: ubuntu-latest
-  #   needs: [backend, admin-frontend]
-  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-  #   environment: production   # can require manual approval in repo settings
-  #   steps:
-  #     - run: echo "All checks passed on main - deploy would happen here."
-
-  # -----------------------------------------------------------------
-  # LESSON 7: Using secrets
-  # Concept: store values in Settings > Secrets and variables > Actions,
-  # then read them with ${{ secrets.NAME }}. They are masked in logs.
-  # -----------------------------------------------------------------
-  # secrets-demo:
-  #   name: Secrets demo
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Use a secret as an env var
-  #       env:
-  #         JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  #
+  #     - name: Info about the runner machine
   #       run: |
-  #         if [ -z "$JWT_SECRET" ]; then echo "Secret not set"; exit 1; fi
-  #         echo "Secret is set (value is hidden: $JWT_SECRET)"
+  #         echo "OS:      $(uname -a)"
+  #         echo "User:    $(whoami)"
+  #         echo "Folder:  $(pwd)"
+  #         echo "Node:    $(node -v)  npm: $(npm -v)"
+  #         echo "CPUs:    $(nproc)"
+  #         df -h . | tail -1
+  #
+  #     - name: Install, lint and test every project in a loop
+  #       run: |
+  #         set -euo pipefail
+  #         echo "| Project | Result |" >> "$GITHUB_STEP_SUMMARY"
+  #         echo "|---|---|"           >> "$GITHUB_STEP_SUMMARY"
+  #         for project in Backend Admin-frontend; do
+  #           echo "::group::$project"          # collapsible section in the log
+  #           cd "$GITHUB_WORKSPACE/$project"
+  #           npm ci
+  #           npm run lint
+  #           npm test
+  #           echo "::endgroup::"
+  #           echo "| $project | passed |" >> "$GITHUB_STEP_SUMMARY"
+  #         done
+  #
+  #     - name: If / else and counting files
+  #       run: |
+  #         count=$(find Backend/src -name '*.js' | wc -l)
+  #         echo "Backend has $count source files"
+  #         if [ "$count" -gt 10 ]; then
+  #           echo "::notice::Big backend ($count files)"
+  #         else
+  #           echo "::notice::Small backend ($count files)"
+  #         fi
+  #
+  #     - name: Folded command (`>` joins lines into ONE command)
+  #       run: >
+  #         find Backend/src -name '*.js'
+  #         -exec wc -l {} +
