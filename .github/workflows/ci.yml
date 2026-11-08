@@ -40,10 +40,8 @@ jobs:
           filters: |
             backend:
               - 'Backend/**'
-              - '.github/workflows/ci.yml'
             frontend:
               - 'Admin-frontend/**'
-              - '.github/workflows/ci.yml'
 
       - name: Show result
         run: |
