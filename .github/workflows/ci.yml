@@ -1,4 +1,4 @@
-name: CI
+name: CI pipeline for backend and admin frontend
 
 on:
   push:
