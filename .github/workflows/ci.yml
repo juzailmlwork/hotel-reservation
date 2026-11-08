@@ -43,6 +43,12 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
+          # On push, compare with the previous commit on THIS branch.
+          # Without this, a push to any branch other than the repo's default
+          # branch (dev) is compared against dev, so main sees every
+          # difference between dev and main as "changed".
+          # (Ignored on pull_request - PRs always use the PR's own files.)
+          base: ${{ github.ref_name }}
           filters: |
             backend:
               - 'Backend/**'
