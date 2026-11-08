@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false          # keep running other versions if one fails
       matrix:
-        node: [22, 24]
+        node: [14,22, 24]
     defaults:
       run:
         working-directory: Backend
