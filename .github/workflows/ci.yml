@@ -140,16 +140,16 @@ jobs:
     runs-on: ubuntu-latest
     # `needs` makes deploy wait for both check jobs. Without it, deploy
     # starts at the SAME TIME and still "deploys" even if checks FAIL.
-    needs: [backend, admin-frontend]
+    # `changes` is listed too so we can read its outputs below.
+    needs: [changes, backend, admin-frontend]
     # By default a job is SKIPPED if any job it needs was skipped - and with
     # paths-filter one of them often is. So the condition is spelled out:
-    #   !failure() && !cancelled()          -> no needed job failed / was cancelled
-    #   contains(needs.*.result, 'success') -> at least ONE check job really ran
-    #                                          and passed (if both were skipped,
-    #                                          nothing changed, so nothing to deploy)
+    #   !failure() && !cancelled()  -> no needed job failed / was cancelled
+    #   changes.outputs ... 'true'  -> at least one folder actually changed
+    #                                  (nothing changed = nothing to deploy)
     if: >-
       !failure() && !cancelled() &&
-      contains(needs.*.result, 'success') &&
+      (needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true') &&
       github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment: production
     env:
@@ -163,6 +163,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: Admin-frontend/package-lock.json
+
+      - name: Show what deploy received from `needs`
+        run: echo '${{ toJSON(needs) }}'
 
       - name: Show variables (safe to print)
         run: |

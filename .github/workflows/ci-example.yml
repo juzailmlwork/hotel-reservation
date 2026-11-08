@@ -1,11 +1,9 @@
 # =====================================================================
-# CI EXAMPLES FOR TEACHING - everything below is commented out.
+# CI EXAMPLES FOR TEACHING
 #
-# This file lives in .github/ (NOT .github/workflows/), so GitHub never
-# runs it. To try a lesson:
-#   1. Copy the lesson's job into .github/workflows/ci.yml under `jobs:`
-#      (or copy this whole file into .github/workflows/ and uncomment).
-#   2. Uncomment it, commit, push, and watch the Actions tab.
+# GitHub only runs workflow files inside .github/workflows/ - that's why
+# this file lives there. Uncommented lessons run; commented ones don't.
+# To try a lesson: uncomment it, commit, push, and watch the Actions tab.
 # Lessons are ordered roughly from easiest to hardest.
 # =====================================================================
 
@@ -30,7 +28,7 @@ on:
 #     - cron: '0 6 * * 1'
 
 jobs:
-  -----------------------------------------------------------------
+  # -----------------------------------------------------------------
   # LESSON 1: Matrix builds - run the same job on several Node versions
   # Concept: `strategy.matrix` creates one job per value.
   # -----------------------------------------------------------------
