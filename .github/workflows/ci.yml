@@ -11,6 +11,7 @@ on:
     # paths:
     #   - 'Backend/**'
     #   - 'Admin-frontend/**'
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -141,10 +142,14 @@ jobs:
     # starts at the SAME TIME and still "deploys" even if checks FAIL.
     needs: [backend, admin-frontend]
     # By default a job is SKIPPED if any job it needs was skipped - and with
-    # paths-filter one of them often is. `!failure() && !cancelled()` means
-    # "run as long as nothing failed" (success or skipped are both fine).
+    # paths-filter one of them often is. So the condition is spelled out:
+    #   !failure() && !cancelled()          -> no needed job failed / was cancelled
+    #   contains(needs.*.result, 'success') -> at least ONE check job really ran
+    #                                          and passed (if both were skipped,
+    #                                          nothing changed, so nothing to deploy)
     if: >-
       !failure() && !cancelled() &&
+      contains(needs.*.result, 'success') &&
       github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment: production
     env:
