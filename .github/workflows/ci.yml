@@ -3,9 +3,9 @@ name: CI pipeline for backend and admin frontend
 on:
   push:
     branches: [dev, main]
-    paths:
-      - 'Backend/**'
-      - 'Admin-frontend/**'
+    # paths:
+    #   - 'Backend/**'
+    #   - 'Admin-frontend/**'
   pull_request:
     branches: [dev, main]
     # paths:
