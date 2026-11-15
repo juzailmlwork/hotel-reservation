@@ -111,10 +111,12 @@ jobs:
       # Bonus: $GITHUB_ENV creates a variable for all LATER steps.
       # ---------------------------------------------------------------
       - name: Create a variable at runtime
-        run: echo "BUILD_VERSION=1.0.${{ github.run_number }}" >> "$GITHUB_ENV"
+        # run: echo "BUILD_VERSION=1.0.${{ github.run_number }}" >> "$GITHUB_ENV"
+        run: echo "BUILD_DATE=$(date +%Y-%m-%d)" >> "$GITHUB_ENV"
 
       - name: Use the runtime variable
-        run: echo "BUILD_VERSION = $BUILD_VERSION"
+        # run: echo "BUILD_VERSION = $BUILD_VERSION"
+        run: echo "BUILD_DATE = $BUILD_DATE"
 
       - name: Built-in variables GitHub always provides
         run: |
