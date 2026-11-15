@@ -1,0 +1,157 @@
+name: Env, variables & secrets demo
+
+# Manual only: Actions tab > "Env, variables & secrets demo" > Run workflow
+on:
+  workflow_dispatch:
+
+# =====================================================================
+# SETUP IN GITHUB
+#
+# Settings > Secrets and variables > Actions  (REPOSITORY level)
+#   Variable: JWT_EXPIRES_IN       1h
+#   Variable: API_URL              http://localhost:5004/api
+#   Secret:   JWT_SECRET           any long random string
+#
+# Settings > Environments > New environment: "dev" and "prod"
+# In EACH environment (same names, different values):
+#   Variable: API_URL              dev:  https://dev-api.hotel.example.com/api
+#                                  prod: https://api.hotel.example.com/api
+#   Variable: CORS_ORIGIN          dev:  https://dev-admin.hotel.example.com
+#                                  prod: https://admin.hotel.example.com
+#   Secret:   SEED_ADMIN_PASSWORD  dev:  dev-admin-pass
+#                                  prod: prod-admin-pass
+#   Optional: on "prod" add "Required reviewers" to show approvals.
+#
+# Note API_URL exists at BOTH levels - inside an environment job the
+# environment value wins over the repository value.
+# Anything not set prints as empty - that's part of the demo too.
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# 1. WORKFLOW-level env: visible to EVERY job and step below.
+# ---------------------------------------------------------------------
+env:
+  APP_NAME: hotel-reservation
+  NODE_VERSION: 24
+  LOG_LEVEL: warn
+
+jobs:
+  # ===================================================================
+  # Job 1: env at workflow / job / step level
+  # ===================================================================
+  env-levels:
+    name: env - workflow, job and step levels
+    runs-on: ubuntu-latest
+
+    # -----------------------------------------------------------------
+    # 2. JOB-level env: visible to every step in THIS job only.
+    #    Same name as a workflow var -> the job value wins.
+    # -----------------------------------------------------------------
+    env:
+      NODE_ENV: test
+      LOG_LEVEL: info
+
+    steps:
+      - name: Read workflow and job env
+        run: |
+          echo "APP_NAME     = $APP_NAME       (workflow)"
+          echo "NODE_VERSION = $NODE_VERSION   (workflow)"
+          echo "NODE_ENV     = $NODE_ENV       (job)"
+          echo "LOG_LEVEL    = $LOG_LEVEL      (job overrides workflow 'warn')"
+
+      # ---------------------------------------------------------------
+      # 3. STEP-level env: visible to THIS step only.
+      #    Precedence: step > job > workflow.
+      # ---------------------------------------------------------------
+      - name: Read step env
+        env:
+          PORT: 5004
+          LOG_LEVEL: debug
+        run: |
+          echo "PORT      = $PORT    (step)"
+          echo "LOG_LEVEL = $LOG_LEVEL   (step overrides job and workflow)"
+
+      - name: Step env is gone in the next step
+        run: |
+          echo "PORT      = '$PORT'   (empty - it belonged to the previous step)"
+          echo "LOG_LEVEL = $LOG_LEVEL    (back to the job value)"
+
+      - name: Two ways to read env
+        run: |
+          echo "Shell syntax:      $NODE_ENV"
+          echo "Expression syntax: ${{ env.NODE_ENV }}"
+
+      # ---------------------------------------------------------------
+      # Bonus: $GITHUB_ENV creates a variable for all LATER steps.
+      # ---------------------------------------------------------------
+      - name: Create a variable at runtime
+        run: echo "BUILD_VERSION=1.0.${{ github.run_number }}" >> "$GITHUB_ENV"
+
+      - name: Use the runtime variable
+        run: echo "BUILD_VERSION = $BUILD_VERSION"
+
+      - name: Built-in variables GitHub always provides
+        run: |
+          echo "GITHUB_REPOSITORY = $GITHUB_REPOSITORY"
+          echo "GITHUB_REF_NAME   = $GITHUB_REF_NAME"
+          echo "GITHUB_ACTOR      = $GITHUB_ACTOR"
+          echo "GITHUB_SHA        = $GITHUB_SHA"
+          echo "RUNNER_OS         = $RUNNER_OS"
+
+  # ===================================================================
+  # Job 2: repository variables and secrets (no environment)
+  # ===================================================================
+  repo-vars-and-secrets:
+    name: Repository variables and secrets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository variables (plain text, shown in logs)
+        run: |
+          echo "JWT_EXPIRES_IN = ${{ vars.JWT_EXPIRES_IN }}"
+          echo "API_URL        = ${{ vars.API_URL }}   (repository value)"
+
+      - name: Repository secret (masked as *** in logs)
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}   # pass secrets in through env
+        run: |
+          echo "JWT_SECRET = $JWT_SECRET"
+          echo "JWT_SECRET length = ${#JWT_SECRET} characters (value stays hidden)"
+
+  # ===================================================================
+  # Jobs 3 & 4: Environments - same names, different values.
+  # `environment:` unlocks that environment's variables and secrets
+  # (plus its protection rules, e.g. required reviewers on prod).
+  # ===================================================================
+  dev:
+    name: Environment - dev
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      SEED_ADMIN_PASSWORD: ${{ secrets.SEED_ADMIN_PASSWORD }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+    steps:
+      - name: Read dev values
+        run: |
+          echo "Environment         = dev"
+          echo "API_URL             = ${{ vars.API_URL }}   (env value beats repo value)"
+          echo "CORS_ORIGIN         = ${{ vars.CORS_ORIGIN }}"
+          echo "SEED_ADMIN_PASSWORD = $SEED_ADMIN_PASSWORD"
+          echo "JWT_SECRET          = $JWT_SECRET   (repo secret, still available)"
+          echo "JWT_EXPIRES_IN      = ${{ vars.JWT_EXPIRES_IN }}   (repo variable, still available)"
+
+  prod:
+    name: Environment - prod
+    runs-on: ubuntu-latest
+    environment: prod
+    env:
+      SEED_ADMIN_PASSWORD: ${{ secrets.SEED_ADMIN_PASSWORD }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+    steps:
+      - name: Read prod values
+        run: |
+          echo "Environment         = prod"
+          echo "API_URL             = ${{ vars.API_URL }}   (env value beats repo value)"
+          echo "CORS_ORIGIN         = ${{ vars.CORS_ORIGIN }}"
+          echo "SEED_ADMIN_PASSWORD = $SEED_ADMIN_PASSWORD"
+          echo "JWT_SECRET          = $JWT_SECRET   (repo secret, still available)"
+          echo "JWT_EXPIRES_IN      = ${{ vars.JWT_EXPIRES_IN }}   (repo variable, still available)"
