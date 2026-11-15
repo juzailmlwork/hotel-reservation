@@ -22,6 +22,11 @@ on:
 #                                  prod: prod-admin-pass
 #   Optional: on "prod" add "Required reviewers" to show approvals.
 #
+# For the VARIABLE1 overwrite demo, also add a Variable called VARIABLE1:
+#   Repository level:      VARIABLE1 = from repository variable
+#   dev environment:       VARIABLE1 = from dev environment
+#   prod environment:      VARIABLE1 = from prod environment
+#
 # Note API_URL exists at BOTH levels - inside an environment job the
 # environment value wins over the repository value.
 # Anything not set prints as empty - that's part of the demo too.
@@ -34,6 +39,7 @@ env:
   APP_NAME: hotel-reservation
   NODE_VERSION: 24
   LOG_LEVEL: warn
+  VARIABLE1: set at WORKFLOW level
 
 jobs:
   # ===================================================================
@@ -50,8 +56,28 @@ jobs:
     env:
       NODE_ENV: test
       LOG_LEVEL: info
+      VARIABLE1: set at JOB level
 
     steps:
+      # ---------------------------------------------------------------
+      # VARIABLE1 overwrite demo: workflow -> job -> step -> back to job
+      # ---------------------------------------------------------------
+      - name: VARIABLE1 (1) - job value overwrites workflow value
+        run: echo "VARIABLE1 = $VARIABLE1"
+
+      - name: VARIABLE1 (2) - step value overwrites job value
+        env:
+          VARIABLE1: set at STEP level
+        run: echo "VARIABLE1 = $VARIABLE1"
+
+      - name: VARIABLE1 (3) - next step, back to the job value
+        run: echo "VARIABLE1 = $VARIABLE1"
+
+      - name: VARIABLE1 (4) - env.VARIABLE1 and vars.VARIABLE1 are DIFFERENT things
+        run: |
+          echo "env.VARIABLE1  = ${{ env.VARIABLE1 }}   (from env: blocks in this file)"
+          echo "vars.VARIABLE1 = ${{ vars.VARIABLE1 }}   (from Settings > Variables)"
+
       - name: Read workflow and job env
         run: |
           echo "APP_NAME     = $APP_NAME       (workflow)"
@@ -110,6 +136,11 @@ jobs:
           echo "JWT_EXPIRES_IN = ${{ vars.JWT_EXPIRES_IN }}"
           echo "API_URL        = ${{ vars.API_URL }}   (repository value)"
 
+      - name: VARIABLE1 (5) - no job env here, so the workflow value shows
+        run: |
+          echo "env.VARIABLE1  = $VARIABLE1"
+          echo "vars.VARIABLE1 = ${{ vars.VARIABLE1 }}   (repository variable)"
+
       - name: Repository secret (masked as *** in logs)
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}   # pass secrets in through env
@@ -139,6 +170,11 @@ jobs:
           echo "JWT_SECRET          = $JWT_SECRET   (repo secret, still available)"
           echo "JWT_EXPIRES_IN      = ${{ vars.JWT_EXPIRES_IN }}   (repo variable, still available)"
 
+      - name: VARIABLE1 (6) - dev environment variable overwrites the repository one
+        run: |
+          echo "env.VARIABLE1  = $VARIABLE1"
+          echo "vars.VARIABLE1 = ${{ vars.VARIABLE1 }}   (dev environment beats repository)"
+
   prod:
     name: Environment - prod
     runs-on: ubuntu-latest
@@ -155,3 +191,8 @@ jobs:
           echo "SEED_ADMIN_PASSWORD = $SEED_ADMIN_PASSWORD"
           echo "JWT_SECRET          = $JWT_SECRET   (repo secret, still available)"
           echo "JWT_EXPIRES_IN      = ${{ vars.JWT_EXPIRES_IN }}   (repo variable, still available)"
+
+      - name: VARIABLE1 (7) - prod environment variable overwrites the repository one
+        run: |
+          echo "env.VARIABLE1  = $VARIABLE1"
+          echo "vars.VARIABLE1 = ${{ vars.VARIABLE1 }}   (prod environment beats repository)"
